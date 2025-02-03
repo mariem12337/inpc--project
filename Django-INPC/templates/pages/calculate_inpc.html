@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+
+{% block title %}Calcul de l'INPC{% endblock %}
+
+{% block content %}
+<!-- Page Container -->
+<div class="container mt-5">
+    <div class="card shadow-lg text-white animate__animated animate__fadeInDown">
+        <div class="card-header text-center">
+            <h1 class="display-4">Calcul de l'INPC</h1>
+            <p class="lead">Saisissez le mois et l'année pour calculer l'INPC.</p>
+        </div>
+
+        <div class="card-body animate__animated animate__fadeInUp">
+            <!-- Formulaire de calcul de l'INPC -->
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="mois">Mois :</label>
+                    <select id="mois" name="mois" class="form-control glowing-input" required>
+                        {% for month in months %}
+                            <option value="{{ month }}" {% if month == selected_month %}selected{% endif %}>
+                                {{ month }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="annee">Année :</label>
+                    <select id="annee" name="annee" class="form-control glowing-input" required>
+                        {% for year in years %}
+                            <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>
+                                {{ year }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-calculator"></i> Calculer
+                    </button>
+                </div>
+            </form>
+
+            <!-- Affichage des erreurs -->
+            {% if error_message %}
+                <div class="alert alert-danger mt-4 animate__animated animate__shakeX">
+                    {{ error_message }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Include JavaScript for Enhancements -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+
+<style>
+/* Animated Background */
+@keyframes moveBackground {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.card {
+    background: linear-gradient(45deg, #1a237e, #283593, #3949ab, #1976d2);
+    background-size: 400% 400%;
+    animation: moveBackground 15s ease infinite;
+}
+
+/* Glowing Input Effect */
+.glowing-input {
+    border: 2px solid #3949ab;
+    transition: all 0.3s ease;
+}
+
+.glowing-input:focus {
+    border-color: #64b5f6;
+    box-shadow: 0 0 15px rgba(100, 181, 246, 0.5);
+}
+
+/* Button Hover Effect */
+.btn-primary {
+    background: linear-gradient(45deg, #1976d2, #2196f3);
+    border: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+}
+
+/* Error Message Animation */
+.alert-danger {
+    border-left: 5px solid #d32f2f;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .card {
+        margin: 10px;
+    }
+    
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .btn-lg {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+    }
+}
+</style>
+
+<script>
+// Live Clock Update
+function updateClock() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString();
+    document.getElementById('clock').textContent = timeString;
+}
+
+$(document).ready(function() {
+    setInterval(updateClock, 1000);
+    updateClock();
+});
+</script>
+
+{% if evolution_data %}
+<div class="row">
+    <div class="col-md-6">
+        <canvas id="lineChart" height="150"></canvas>
+    </div>
+    <div class="col-md-6">
+        <canvas id="barChart" height="150"></canvas>
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-md-6 offset-md-3">
+        <canvas id="pieChart" height="150"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const labels = {{ evolution_data.labels|safe }};
+    const values = {{ evolution_data.values|safe }};
+    const productData = {{ evolution_data.products|safe }};
+
+    console.log("📊 Données pour les graphiques :", labels, values, productData);
+
+    if (labels.length === 0 || values.length === 0) {
+        console.warn("⚠️ Pas assez de données pour afficher les graphiques !");
+        return;
+    }
+
+    // Graphique linéaire (INPC Global)
+    new Chart(document.getElementById('lineChart').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Évolution INPC (Calcul en cours)',
+                data: values,
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                borderWidth: 1,
+                pointRadius: 2
+            }]
+        },
+        options: { responsive: true }
+    });
+
+    // Graphique en barres (INPC par produit)
+    let datasets = [];
+    for (let product in productData) {
+        datasets.push({
+            label: product,
+            data: productData[product],
+            borderWidth: 1
+        });
+    }
+
+    if (datasets.length > 0) {
+        new Chart(document.getElementById('barChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: { responsive: true }
+        });
+
+        // Graphique en camembert (Répartition des produits pour le dernier mois)
+        let lastMonthProducts = Object.keys(productData);
+        let lastMonthValues = lastMonthProducts.map(p => productData[p][productData[p].length - 1]);
+
+        new Chart(document.getElementById('pieChart').getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: lastMonthProducts,
+                datasets: [{
+                    data: lastMonthValues,
+                    backgroundColor: ['#007bff', '#28a745', '#dc3545', '#ffc107', '#17a2b8']
+                }]
+            },
+            options: { responsive: true }
+        });
+    } else {
+        console.warn("⚠️ Pas assez de données pour les graphiques !");
+    }
+});
+</script>
+{% endif %}
+
+{% endblock %}

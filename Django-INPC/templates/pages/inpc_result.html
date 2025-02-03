@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}Résultat du calcul de l'INPC{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white text-center py-2">
+            <h3 class="mb-0">Résultat du calcul de l'INPC</h3>
+        </div>
+        
+        <div class="card-body p-3">
+            {% if inpc_data %}
+                <div class="text-center mb-3">
+                    <small class="text-muted">INPC Global</small>
+                    <div class="h4 text-primary">{{ inpc_data.total|floatformat:2 }}</div>
+                </div>
+
+                <!-- Tableau des détails -->
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped mb-3">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Code</th>
+                                <th>Produit</th>
+                                <th>Prix</th>
+                                <th>Poids</th>
+                                <th>INPC</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in inpc_data.products %}
+                            <tr>
+                                <td>{{ item.product_code }}</td>
+                                <td>{{ item.product_name }}</td>
+                                <td>{{ item.avg_price|floatformat:2 }}</td>
+                                <td>{{ item.weight|floatformat:4 }}</td>
+                                <td>{{ item.inpc|floatformat:2 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Graphique simplifié avec correction des données -->
+                {% if inpc_data.products %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <canvas id="lineChart" height="150"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                        <canvas id="barChart" height="150"></canvas>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6 offset-md-3">
+                        <canvas id="pieChart" height="150"></canvas>
+                    </div>
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-warning text-center py-2">
+                    Aucune donnée disponible
+                </div>
+            {% endif %}
+
+            <div class="text-center mt-3">
+                <a href="{% url 'calculate_inpc' %}" class="btn btn-sm btn-primary">
+                    Nouveau calcul
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts pour le graphique -->
+{% if inpc_data.products %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    <div id="graphMessage"></div>
+   
+document.addEventListener('DOMContentLoaded', function() {
+    // Récupérer les labels et valeurs depuis inpc_data
+    
+        const labels = {{ evolution_data.labels|safe }};
+        const values = {{ evolution_data.values|safe }};
+        const productData = {{ evolution_data.products|safe }};
+    
+        console.log("📊 Données pour les graphiques :", labels, values, productData);
+    
+        if (labels.length === 0 || values.length === 0) {
+            console.warn("⚠️ Pas assez de données pour afficher les graphiques !");
+            document.getElementById("graphMessage").innerHTML = 
+                "<div class='alert alert-warning text-center'>Pas assez de données pour générer les graphiques.</div>";
+            return;  // Empêche l'affichage des graphiques si aucune donnée
+        }
+    
+        // Graphique linéaire (INPC Global)
+        new Chart(document.getElementById('lineChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'INPC Global (2024 uniquement)',
+                    data: values,
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    borderWidth: 1,
+                    pointRadius: 2
+                }]
+            },
+            options: { responsive: true }
+        });
+    
+        // Graphique en barres (INPC par produit)
+        let datasets = [];
+        for (let product in productData) {
+            datasets.push({
+                label: product,
+                data: productData[product],
+                borderWidth: 1
+            });
+        }
+    
+        if (datasets.length > 0) {
+            new Chart(document.getElementById('barChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: { responsive: true }
+            });
+    
+            // Graphique en camembert (Répartition des produits pour le dernier mois)
+            let lastMonthProducts = Object.keys(productData);
+            let lastMonthValues = lastMonthProducts.map(p => productData[p][productData[p].length - 1]);
+    
+            new Chart(document.getElementById('pieChart').getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: lastMonthProducts,
+                    datasets: [{
+                        data: lastMonthValues,
+                        backgroundColor: ['#007bff', '#28a745', '#dc3545', '#ffc107', '#17a2b8']
+                    }]
+                },
+                options: { responsive: true }
+            });
+        } else {
+            console.warn("⚠️ Pas assez de données pour les graphiques !");
+            document.getElementById("graphMessage").innerHTML = 
+                "<div class='alert alert-warning text-center'>Pas assez de données pour générer les graphiques.</div>";
+        }
+    });
+    
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,68 @@
+<!-- Modal Modification de Produit -->
+<div class="modal fade" id="editModal{{ produit.id }}" tabindex="-1" aria-labelledby="editModalLabel{{ produit.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editModalLabel{{ produit.id }}">
+                    <i class="fas fa-edit me-2"></i>Modifier le Produit : {{ produit.name }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <form method="POST" action="{% url 'gestion_produits' %}">
+                {% csrf_token %}
+                <input type="hidden" name="product_id" value="{{ produit.id }}">
+                
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="name_{{ produit.id }}" class="form-label">Nom du Produit</label>
+                            <input type="text" class="form-control" id="name_{{ produit.id }}" name="name" value="{{ produit.name }}" required>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="description_{{ produit.id }}" class="form-label">Description</label>
+                            <input type="text" class="form-control" id="description_{{ produit.id }}" name="description" value="{{ produit.description }}">
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="unit_measure_{{ produit.id }}" class="form-label">Unité de Mesure</label>
+                            <input type="text" class="form-control" id="unit_measure_{{ produit.id }}" name="unit_measure" value="{{ produit.unit_measure }}" required>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="product_type_{{ produit.id }}" class="form-label">Type de Produit</label>
+                            <select class="form-select" id="product_type_{{ produit.id }}" name="product_type" required>
+                                {% for type in product_types %}
+                                <option value="{{ type.id }}" {% if type == produit.product_type %}selected{% endif %}>
+                                    {{ type.label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="famille_{{ produit.id }}" class="form-label">Famille</label>
+                            <select class="form-select" id="famille_{{ produit.id }}" name="famille" required>
+                                {% for famille in familles %}
+                                <option value="{{ famille.id }}" {% if famille == produit.famille %}selected{% endif %}>
+                                    {{ famille.nom }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Annuler
+                    </button>
+                    <button type="submit" name="modifier" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
