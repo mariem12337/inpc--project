@@ -28,5 +28,5 @@ Assurez-vous d’avoir installé :
 
 ### **2️⃣ Cloner le projet**  
 ```bash
-git clone 
+git clone https://github.com/mariem12337/inpc--project.git
 cd Projet
