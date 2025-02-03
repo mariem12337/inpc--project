@@ -20,7 +20,12 @@ SECRET_KEY = 'django-insecure-s+qi&_ewpw!_z7^8+4qf=r_dpj4ci*&3dey@luy*alsuyk06)_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [
+    'teaching.sidi.xyz',
+    '138.201.52.29',
+     'localhost' 
+    # Ajoutez d'autres hôtes si nécessaire
+]
 
 # Installed apps
 INSTALLED_APPS = [
@@ -34,9 +39,12 @@ INSTALLED_APPS = [
     'import_export',
     'utilisateurs',
 ]
- #CSRF_TRUSTED_ORIGINS = [
-    #'http://138.201.52.29:25054',
- #]
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://138.201.52.29:25054',
+    'http://teaching.sidi.xyz:25054',
+]
+
 # Middleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

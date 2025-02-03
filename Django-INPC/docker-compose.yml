@@ -9,7 +9,7 @@ services:
     build: .
     container_name: djangoinpc_23054
     ports:
-      - "23054:8000"  # Host port 23054 mapped to container port 23054
+      - "23054:8000" 
     volumes:
       - .:/app
     environment:
