@@ -4,7 +4,7 @@
 <h1>Exporter des données</h1>
 <form method="get" action="{% url 'export_data' %}">
     <label for="table">Sélectionnez un modèle :</label>
-    <select name="table" id="table">
+    <select name="table" id="table" class="form-select">
         <option value="Wilaya">Wilayas</option>
         <option value="Moughataa">Moughataas</option>
         <option value="Commune">Communes</option>
@@ -17,6 +17,8 @@
         <option value="Prix">Prix</option>
     </select>
     <br><br>
-    <button type="submit">Exporter</button>
+    <button type="submit" class="btn btn-secondary">
+        <i class="fas fa-file-export"></i> Exporter
+    </button>
 </form>
 {% endblock %}

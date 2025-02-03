@@ -5,40 +5,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Mon Projet Django{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- FontAwesome CSS -->
-    <link 
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" 
-    rel="stylesheet" 
-    integrity="sha512-dIe0kIh2pn/J4RZgHEWAn0rURfAM2B8B3D9gKABy3/Pqm6m3W9E9st6CX+YOH0fTKPEt2Yb4g76r1H//W8OA8w==" 
-    crossorigin="anonymous" 
-    referrerpolicy="no-referrer" 
-    />
+
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
     <!-- Animate.css -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    
-    <!-- Bootstrap CSS -->
-    <link 
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
-    rel="stylesheet" 
-    integrity="sha384-rbsA2VBKQZ1lB9phGxC4VcLLHklB5Ft6QQwl80tXtRaJ1Q8CQALTTXeVSmz9TOXa" 
-    crossorigin="anonymous"
-    />
 
+    <!-- Styles personnalisés -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <!-- Leaflet CSS (pour la carte) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+
+    <style>
+        /* Couleur de la barre de navigation */
+        .navbar {
+            background-color: #0d47a1 !important; /* Bleu foncé */
+        }
+        
+        /* Couleur du texte et des icônes */
+        .navbar .nav-link, .navbar-brand {
+            color: white !important;
+        }
+        
+        /* Effet de survol des liens */
+        .navbar .nav-link:hover {
+            color: #ffcc00 !important; /* Jaune doré */
+        }
+        
+        /* Style spécifique pour Import et Export */
+        .nav-link[href*="import_data"] {
+            color: #2196F3 !important; /* Bleu */
+        }
+
+        .nav-link[href*="export_data"] {
+            color: #4CAF50 !important; /* Vert */
+        }
+
+        /* Style du bouton actif */
+        .nav-link.active, .nav-link:focus {
+            font-weight: bold;
+            border-bottom: 2px solid #ffcc00;
+        }
+    </style>
 </head>
 <body>
+
     <!-- Barre de navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <nav class="navbar navbar-expand-lg shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold text-primary" href="#">
+            <a class="navbar-brand fw-bold" href="#">
                 <i class="fas fa-calculator"></i> INPC Calculator
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,27 +69,44 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link nav-hover" href="{% url 'accueil' %}">
+                        <a class="nav-link" href="{% url 'accueil' %}">
                             <i class="fas fa-home"></i> Accueil
                         </a>
                     </li>
 
-                    <!-- Dropdown Localisation -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle nav-hover" href="#" id="dropdownLocalisation" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-map-marker-alt"></i> Localisation
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{% url 'gestion_wilayas' %}"><i class="fas fa-map"></i> Wilayas</a></li>
-                            <li><a class="dropdown-item" href="{% url 'gestion_moughataas' %}"><i class="fas fa-map-marker-alt"></i> Moughataas</a></li>
-                            <li><a class="dropdown-item" href="{% url 'gestion_communes' %}"><i class="fas fa-city"></i> Communes</a></li>
-                            <li><a class="dropdown-item" href="{% url 'gestion_points_de_vente' %}"><i class="fas fa-store"></i> Points de Vente</a></li>
-                        </ul>
-                    </li>
+                    <!-- Localisation -->
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="dropdownLocalisation" role="button" data-bs-toggle="dropdown">
+        <i class="fas fa-map-marker-alt"></i> Localisation
+    </a>
+    <div class="dropdown-menu dropdown-menu-end">
+        <a class="dropdown-item" href="{% url 'gestion_wilayas' %}"><i class="fas fa-map"></i> Wilayas</a>
+        <a class="dropdown-item" href="{% url 'gestion_moughataas' %}"><i class="fas fa-map-marker-alt"></i> Moughataas</a>
+        <a class="dropdown-item" href="{% url 'gestion_communes' %}"><i class="fas fa-city"></i> Communes</a>
+        <a class="dropdown-item" href="{% url 'gestion_points_de_vente' %}"><i class="fas fa-store"></i> Points de Vente</a>
 
-                    <!-- Dropdown Autres -->
+        <!-- Filtres pour la carte -->
+        <div class="dropdown-divider"></div>
+        <div class="dropdown-item text-center">
+            <h6 class="text-primary">Carte des Localisations</h6>
+        </div>
+        <div class="dropdown-item">
+            <form id="mapFilters">
+                <label><input type="checkbox" id="toggleWilayas" checked> Wilayas</label><br>
+                <label><input type="checkbox" id="toggleMoughataas" checked> Moughataas</label><br>
+                <label><input type="checkbox" id="toggleCommunes" checked> Communes</label><br>
+                <label><input type="checkbox" id="togglePointsVente" checked> Points de Vente</label>
+            </form>
+        </div>
+        <div class="dropdown-item">
+            <div id="map" style="width: 300px; height: 200px;"></div>
+        </div>
+    </div>
+</li>
+
+                    <!-- Autres -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle nav-hover" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-bars"></i> Autres
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
@@ -82,21 +120,21 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link nav-hover" href="{% url 'import_data' %}">
+                        <a class="nav-link" href="{% url 'import_data' %}">
                             <i class="fas fa-file-import"></i> Import
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link nav-hover" href="{% url 'export_data' %}">
+                        <a class="nav-link" href="{% url 'export_data' %}">
                             <i class="fas fa-file-export"></i> Export
                         </a>
                     </li>
 
                     {% if user.is_authenticated %}
-                    <!-- User Info and Logout -->
+                    <!-- User Info -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle nav-hover" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-user"></i> {{ user.username }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
@@ -110,10 +148,6 @@
                         </ul>
                     </li>
                     {% endif %}
-                    
-        
-
-                    
                 </ul>
             </div>
         </div>
@@ -125,15 +159,102 @@
         {% endblock content %}
     </div>
 
-    <!-- JavaScript de Bootstrap -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+     
+    
+     <!-- Leaflet JS -->
+     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
     <script>
-        document.querySelectorAll('.btn').forEach(button => {
-          button.addEventListener('click', function () {
-            document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-          });
+document.addEventListener('DOMContentLoaded', function () {
+    var map = L.map('map').setView([18.079, -15.965], 5); // Centré sur la Mauritanie
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Groupes de marqueurs pour chaque catégorie
+    var wilayaMarkers = L.layerGroup().addTo(map);
+    var moughataaMarkers = L.layerGroup().addTo(map);
+    var communeMarkers = L.layerGroup().addTo(map);
+    var pointVenteMarkers = L.layerGroup().addTo(map);
+
+    // Charger les données depuis l'API Django
+    fetch('/api/localisation/')
+        .then(response => response.json())
+        .then(data => {
+            // Ajouter les Wilayas
+            data.wilayas.forEach(wilaya => {
+                if (wilaya.latitude && wilaya.longitude) {
+                    var marker = L.marker([wilaya.latitude, wilaya.longitude])
+                        .bindPopup(`<b>Wilaya:</b> ${wilaya.name}`);
+                    wilayaMarkers.addLayer(marker);
+                }
+            });
+
+            // Ajouter les Moughataas
+            data.moughataas.forEach(moughataa => {
+                if (moughataa.latitude && moughataa.longitude) {
+                    var marker = L.marker([moughataa.latitude, moughataa.longitude], {icon: L.divIcon({className: 'moughataa-marker'})})
+                        .bindPopup(`<b>Moughataa:</b> ${moughataa.name}`);
+                    moughataaMarkers.addLayer(marker);
+                }
+            });
+
+            // Ajouter les Communes
+            data.communes.forEach(commune => {
+                if (commune.latitude && commune.longitude) {
+                    var marker = L.marker([commune.latitude, commune.longitude], {icon: L.divIcon({className: 'commune-marker'})})
+                        .bindPopup(`<b>Commune:</b> ${commune.name}`);
+                    communeMarkers.addLayer(marker);
+                }
+            });
+
+            // Ajouter les Points de Vente
+            data.points_de_vente.forEach(point => {
+                if (point.latitude && point.longitude) {
+                    var marker = L.marker([point.latitude, point.longitude], {icon: L.divIcon({className: 'pointvente-marker'})})
+                        .bindPopup(`<b>Point de Vente:</b> ${point.code}`);
+                    pointVenteMarkers.addLayer(marker);
+                }
+            });
+
+            // Gérer les filtres
+            document.getElementById('toggleWilayas').addEventListener('change', function () {
+                if (this.checked) {
+                    map.addLayer(wilayaMarkers);
+                } else {
+                    map.removeLayer(wilayaMarkers);
+                }
+            });
+
+            document.getElementById('toggleMoughataas').addEventListener('change', function () {
+                if (this.checked) {
+                    map.addLayer(moughataaMarkers);
+                } else {
+                    map.removeLayer(moughataaMarkers);
+                }
+            });
+
+            document.getElementById('toggleCommunes').addEventListener('change', function () {
+                if (this.checked) {
+                    map.addLayer(communeMarkers);
+                } else {
+                    map.removeLayer(communeMarkers);
+                }
+            });
+
+            document.getElementById('togglePointsVente').addEventListener('change', function () {
+                if (this.checked) {
+                    map.addLayer(pointVenteMarkers);
+                } else {
+                    map.removeLayer(pointVenteMarkers);
+                }
+            });
         });
-    </script>
+});
+</script>
+
 </body>
 </html>

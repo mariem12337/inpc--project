@@ -4,6 +4,9 @@
 {% block title %}Gestion des Types de Produits{% endblock %}
 
 {% block content %}
+<!-- Importation des styles de DataTables Bootstrap 5 -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.bootstrap5.min.css">
 <link rel="stylesheet" href="{% static 'css/stylecrud.css' %}">
 
 <div class="container mt-5">
@@ -16,23 +19,23 @@
 
         <div class="card-body animate__animated animate__fadeInUp">
             <div class="d-flex justify-content-between mb-3">
-                <!-- Export / Import Buttons -->
+                <!-- Boutons d'exportation et importation -->
                 <a href="{% url 'export_data' %}?table=ProductType" class="btn btn-success">
                     <i class="fas fa-file-export"></i> Exporter les Types de Produits
                 </a>
-                <a href="{% url 'import_data' %}" class="btn btn-success">
+                <a href="{% url 'import_data' %}" class="btn btn-warning">
                     <i class="fas fa-file-import"></i> Importer des données
                 </a>
             </div>
 
-            <!-- Button to Open Add Product Type Modal -->
+            <!-- Bouton d'ajout -->
             <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createModal">
                 <i class="fas fa-plus"></i> Ajouter un Type de Produit
             </button>
 
-            <!-- Product Type Table -->
-            <table class="table table-hover table-striped text-white">
-                <thead class="bg-dark">
+            <!-- Tableau des types de produits avec DataTables -->
+            <table id="productTypeTable" class="table table-hover table-striped">
+                <thead class="table-dark">
                     <tr>
                         <th>ID</th>
                         <th>Code</th>
@@ -49,26 +52,26 @@
                         <td>{{ product_type.label }}</td>
                         <td>{{ product_type.description }}</td>
                         <td>
-                            <!-- Action Buttons -->
-                            <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#viewModal{{ product_type.id }}">
-                                <i class="fas fa-eye"></i> Voir
+                            <!-- Boutons d'action -->
+                            <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#viewModal{{ product_type.id }}">
+                                <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModal{{ product_type.id }}">
-                                <i class="fas fa-edit"></i> Modifier
+                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ product_type.id }}">
+                                <i class="fas fa-edit"></i>
                             </button>
                             <form method="post" style="display:inline;">
                                 {% csrf_token %}
                                 <input type="hidden" name="delete_id" value="{{ product_type.id }}">
-                                <button type="submit" name="supprimer" onclick="return confirm('Es-tu sûr de vouloir supprimer ce Type de Produit ?')" class="btn btn-danger">
-                                    <i class="fas fa-trash"></i> Supprimer
+                                <button type="submit" name="supprimer" onclick="return confirm('Es-tu sûr de vouloir supprimer ce Type de Produit ?')" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i>
                                 </button>
                             </form>
                         </td>
                     </tr>
 
-                    <!-- Modal: View Product Type Details -->
+                    <!-- Modal pour afficher les détails -->
                     <div class="modal fade" id="viewModal{{ product_type.id }}" tabindex="-1">
-                        <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title">Détails du Type de Produit</h5>
@@ -83,40 +86,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Modal: Edit Product Type -->
-                    <div class="modal fade" id="editModal{{ product_type.id }}" tabindex="-1">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Modifier le Type de Produit</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                </div>
-                                <form method="post">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="edit_id" value="{{ product_type.id }}">
-                                    <div class="modal-body">
-                                        <div class="mb-3">
-                                            <label class="form-label">Code</label>
-                                            <input type="text" name="code" class="form-control" value="{{ product_type.code }}" required>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Label</label>
-                                            <input type="text" name="label" class="form-control" value="{{ product_type.label }}" required>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Description</label>
-                                            <textarea name="description" class="form-control" required>{{ product_type.description }}</textarea>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                        <button type="submit" name="modifier" class="btn btn-warning">Enregistrer</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
                     {% endfor %}
                 </tbody>
             </table>
@@ -124,9 +93,9 @@
     </div>
 </div>
 
-<!-- Modal: Ajouter un Type de Produit (PLACÉ EN DEHORS DE .card-body) -->
+<!-- Modal: Ajouter un Type de Produit -->
 <div class="modal fade" id="createModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Ajouter un Type de Produit</h5>
@@ -134,7 +103,6 @@
             </div>
             <form method="post">
                 {% csrf_token %}
-                <input type="hidden" name="creer" value="1">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Code</label>
@@ -158,6 +126,43 @@
     </div>
 </div>
 
-<script src="{% static 'js/crud.js' %}"></script>
+<!-- Importation des scripts de DataTables -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+
+<!-- Scripts pour l'exportation -->
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
+
+<!-- Activation de DataTables avec les boutons d'exportation -->
+<script>
+$(document).ready(function() {
+    $('#productTypeTable').DataTable({
+        "paging": true,
+        "searching": true,
+        "ordering": true,
+        "info": true,
+        "language": {
+            "search": "🔍 Rechercher :",
+            "paginate": {
+                "next": "Suivant",
+                "previous": "Précédent"
+            }
+        },
+        "dom": 'Bfrtip',
+        "buttons": [
+            { extend: 'excelHtml5', text: '<i class="fas fa-file-excel"></i> Excel', className: 'btn btn-success' },
+            { extend: 'pdfHtml5', text: '<i class="fas fa-file-pdf"></i> PDF', className: 'btn btn-danger' },
+            { extend: 'print', text: '<i class="fas fa-print"></i> Imprimer', className: 'btn btn-primary' }
+        ]
+    });
+});
+</script>
 
 {% endblock %}

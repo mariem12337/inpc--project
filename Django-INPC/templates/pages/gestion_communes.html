@@ -4,23 +4,26 @@
 {% block title %}Gestion des Communes{% endblock %}
 
 {% block content %}
+<!-- Importation des styles de DataTables Bootstrap 5 -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.bootstrap5.min.css">
 <link rel="stylesheet" href="{% static 'css/stylecrud.css' %}">
 
 <div class="container mt-5">
     <div class="card shadow-lg text-white animate__animated animate__fadeInDown">
         <div class="card-header text-center">
             <h1 class="display-4">Gestion des Communes</h1>
-            <p class="lead">Ajoutez, modifiez et gérez les communes efficacement.</p>
+            <p class="lead">Ajoutez, modifiez et gérez les Communes efficacement.</p>
         </div>
 
         <div class="card-body animate__animated animate__fadeInUp">
             <div class="d-flex justify-content-between mb-3">
                 <!-- Export / Import Buttons -->
                 <a href="{% url 'export_data' %}?table=Commune" class="btn btn-success">
-                    <i class="fas fa-file-export"></i> Exporter les Communes
+                    <i class="fas fa-file-excel"></i> Exporter
                 </a>
-                <a href="{% url 'import_data' %}" class="btn btn-success">
-                    <i class="fas fa-file-import"></i> Importer des données
+                <a href="{% url 'import_data' %}" class="btn btn-warning">
+                    <i class="fas fa-file-import"></i> Importer
                 </a>
             </div>
 
@@ -29,9 +32,9 @@
                 <i class="fas fa-plus"></i> Ajouter une Commune
             </button>
 
-            <!-- Communes Table -->
-            <table class="table table-hover table-striped text-white">
-                <thead class="bg-dark">
+            <!-- Communes Table avec DataTables -->
+            <table id="communesTable" class="table table-hover table-striped">
+                <thead class="table-dark">
                     <tr>
                         <th>ID</th>
                         <th>Code</th>
@@ -48,65 +51,21 @@
                         <td>{{ commune.name }}</td>
                         <td>{{ commune.moughataa.label }}</td>
                         <td>
-                            <!-- Action Buttons -->
-                            <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#viewModal{{ commune.id }}">
-                                <i class="fas fa-eye"></i> Voir
+                            <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#viewModal{{ commune.id }}">
+                                <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModal{{ commune.id }}">
-                                <i class="fas fa-edit"></i> Modifier
+                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ commune.id }}">
+                                <i class="fas fa-edit"></i>
                             </button>
                             <form method="post" style="display:inline;">
                                 {% csrf_token %}
-                                <input type="hidden" name="supprimer" value="1"> <!-- ✅ Ajout pour éviter erreurs -->
-                                <input type="hidden" name="commune_id" value="{{ commune.id }}">
-                                <button type="submit"  name ="supprimer" onclick="return confirm('Es-tu sûr de vouloir supprimer cette Moughataa ?')" class="btn btn-danger" >
-                                    <i class="fas fa-trash"></i> Supprimer
+                                <input type="hidden" name="delete_id" value="{{ commune.id }}">
+                                <button type="submit" name="supprimer" onclick="return confirm('Voulez-vous vraiment supprimer cette commune ?')" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i>
                                 </button>
                             </form>
                         </td>
                     </tr>
-
-                    <!-- Modal: Edit Commune -->
-                    <div class="modal fade" id="editModal{{ commune.id }}" tabindex="-1">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Modifier Commune</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                </div>
-                                <form method="post">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="modifier" value="1">
-                                    <input type="hidden" name="commune_id" value="{{ commune.id }}">
-                                    <div class="modal-body">
-                                        <div class="mb-3">
-                                            <label class="form-label">Code</label>
-                                            <input type="text" name="code" class="form-control glowing-input" value="{{ commune.code }}" required>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Nom</label>
-                                            <input type="text" name="name" class="form-control glowing-input" value="{{ commune.name }}" required>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Moughataa</label>
-                                            <select name="moughataa" class="form-control glowing-input" required>
-                                                {% for moughataa in moughataas %}
-                                                <option value="{{ moughataa.id }}" {% if moughataa.id == commune.moughataa.id %}selected{% endif %}>
-                                                    {{ moughataa.label }}
-                                                </option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                        <button type="submit" class="btn btn-primary">Modifier</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
                     {% endfor %}
                 </tbody>
             </table>
@@ -114,7 +73,7 @@
     </div>
 </div>
 
-<!-- Modal: Add New Commune -->
+<!-- Modal: Ajouter une Commune -->
 <div class="modal fade" id="createModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -124,7 +83,6 @@
             </div>
             <form method="post">
                 {% csrf_token %}
-                <input type="hidden" name="creer" value="1">  <!-- ✅ Correction pour éviter conflits -->
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Code</label>
@@ -145,13 +103,50 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary">Créer</button>
+                    <button type="submit" name="creer" class="btn btn-primary">Créer</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- JavaScript for Enhancements -->
-<script src="{% static 'js/crud.js' %}"></script>
+<!-- Importation des scripts de DataTables -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+
+<!-- Scripts pour l'exportation -->
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
+
+<!-- Activation de DataTables avec les boutons d'exportation -->
+<script>
+$(document).ready(function() {
+    $('#communesTable').DataTable({
+        "paging": true,
+        "searching": true,
+        "ordering": true,
+        "info": true,
+        "language": {
+            "search": "🔍 Rechercher :",
+            "paginate": {
+                "next": "Suivant",
+                "previous": "Précédent"
+            }
+        },
+        "dom": 'Bfrtip',
+        "buttons": [
+            { extend: 'excelHtml5', text: '<i class="fas fa-file-excel"></i> Excel', className: 'btn btn-success' },
+            { extend: 'pdfHtml5', text: '<i class="fas fa-file-pdf"></i> PDF', className: 'btn btn-danger' },
+            { extend: 'print', text: '<i class="fas fa-print"></i> Imprimer', className: 'btn btn-primary' }
+        ]
+    });
+});
+</script>
+
 {% endblock %}

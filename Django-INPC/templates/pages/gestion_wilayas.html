@@ -3,7 +3,11 @@
 {% block title %}Gestion des Wilayas{% endblock %}
 
 {% block content %}
+<!-- Importation des styles de DataTables Bootstrap 5 -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.bootstrap5.min.css">
 <link rel="stylesheet" href="{% static 'css/stylecrud.css' %}">
+
 <div class="container mt-5">
     <div class="card shadow-lg text-white animate__animated animate__fadeInDown">
         <div class="card-header text-center">
@@ -18,7 +22,7 @@
                 <a href="{% url 'export_data' %}?table=Wilaya" class="btn btn-success">
                     <i class="fas fa-file-export"></i> Exporter les Wilayas
                 </a>
-                <a href="{% url 'import_data' %}" class="btn btn-success">
+                <a href="{% url 'import_data' %}" class="btn btn-warning">
                     <i class="fas fa-file-import"></i> Importer des données
                 </a>
             </div>
@@ -28,9 +32,9 @@
                 <i class="fas fa-plus"></i> Ajouter une Wilaya
             </button>
 
-            <!-- Tableau des wilayas -->
-            <table class="table table-hover table-striped text-white">
-                <thead class="bg-dark">
+            <!-- Tableau des wilayas avec DataTables -->
+            <table id="wilayaTable" class="table table-hover table-striped">
+                <thead class="table-dark">
                     <tr>
                         <th>ID</th>
                         <th>Code</th>
@@ -46,17 +50,17 @@
                         <td>{{ wilaya.name }}</td>
                         <td>
                             <!-- Boutons d'action -->
-                            <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#viewModal{{ wilaya.id }}">
-                                <i class="fas fa-eye"></i> Voir
+                            <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#viewModal{{ wilaya.id }}">
+                                <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModal{{ wilaya.id }}">
-                                <i class="fas fa-edit"></i> Modifier
+                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ wilaya.id }}">
+                                <i class="fas fa-edit"></i>
                             </button>
                             <form method="post" style="display:inline;">
                                 {% csrf_token %}
                                 <input type="hidden" name="wilaya_id" value="{{ wilaya.id }}">
-                                <button type="submit"  name ="supprimer" onclick="return confirm('Es-tu sûr de vouloir supprimer cette Moughataa ?')" class="btn btn-danger">
-                                    <i class="fas fa-trash"></i> Supprimer
+                                <button type="submit" name="supprimer" onclick="return confirm('Es-tu sûr de vouloir supprimer cette Wilaya ?')" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i>
                                 </button>
                             </form>
                         </td>
@@ -115,47 +119,50 @@
     </div>
 </div>
 
-<!-- Modal pour ajouter une Wilaya -->
-<div class="modal fade" id="createModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Ajouter une Wilaya</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="post">
-                {% csrf_token %}
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="code" class="form-label">Code</label>
-                        <input type="text" name="code" class="form-control glowing-input">
-                    </div>
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Nom</label>
-                        <input type="text" name="name" class="form-control glowing-input">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" name="creer" class="btn btn-primary">Créer</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+<!-- Importation des scripts de DataTables Bootstrap 5 -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
 
+<!-- Scripts pour l'exportation -->
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
+
+<!-- Activation de DataTables avec les boutons d'exportation -->
 <script>
-$(document).ready(function () {
-    // Live Clock Update
-    function updateClock() {
-        let now = new Date();
-        let timeString = now.toLocaleTimeString("fr-FR", { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        $("#clock").text("🕒 " + timeString);
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
+$(document).ready(function() {
+    $('#wilayaTable').DataTable({
+        "paging": true,
+        "searching": true,
+        "ordering": true,
+        "info": true,
+        "lengthMenu": [5, 10, 25, 50],
+        "language": {
+            "lengthMenu": "Afficher _MENU_ entrées par page",
+            "zeroRecords": "Aucune donnée trouvée",
+            "info": "Affichage de _START_ à _END_ sur _TOTAL_ entrées",
+            "infoEmpty": "Aucune donnée disponible",
+            "search": "🔍 Rechercher :",
+            "paginate": {
+                "first": "Premier",
+                "last": "Dernier",
+                "next": "Suivant",
+                "previous": "Précédent"
+            }
+        },
+        "dom": 'Bfrtip',
+        "buttons": [
+            { extend: 'excelHtml5', text: '<i class="fas fa-file-excel"></i> Excel', className: 'btn btn-success' },
+            { extend: 'pdfHtml5', text: '<i class="fas fa-file-pdf"></i> PDF', className: 'btn btn-danger' },
+            { extend: 'print', text: '<i class="fas fa-print"></i> Imprimer', className: 'btn btn-primary' }
+        ]
+    });
 });
 </script>
-<script src="{% static 'js/crud.js' %}"></script>
 
 {% endblock %}
